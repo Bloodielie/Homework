@@ -3,5 +3,5 @@ def get_longest_word(string: str) -> str:
 
 
 if __name__ == "__main__":
-    print(get_longest_word('Python is simple and effective!'))
-    print(get_longest_word('Any pythonista like namespaces a lot.'))
+    print(get_longest_word("Python is simple and effective!"))
+    print(get_longest_word("Any pythonista like namespaces a lot."))
