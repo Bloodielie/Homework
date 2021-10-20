@@ -29,18 +29,18 @@ ITEM = """
 """
 
 
-def get_dict(dataclass_: DataClassType) -> Dict[str, Any]:
-    """Converts dataclass to dict."""
+def get_json_text(dataclass_: DataClassType) -> str:
+    """Converts dataclass to string json representation."""
 
-    logger.debug("Convert {} to dict.".format(dataclass_.__class__))
+    logger.debug("Convert {} to string json representation.".format(dataclass_.__class__.__name__))
     dict_result = asdict(dataclass_)
-    return json.loads(json.dumps(dict_result, default=str))
+    return json.dumps(dict_result, default=str, indent=4)
 
 
 def get_text(channel: Channel) -> str:
     """Converts channel dataclass to string."""
 
-    logger.debug("Convert {} to string.".format(channel.__class__))
+    logger.debug("Convert {} to string.".format(channel.__class__.__name__))
     result = CHANNEL_TEXT.format(
         title=channel.title,
         link=channel.link,

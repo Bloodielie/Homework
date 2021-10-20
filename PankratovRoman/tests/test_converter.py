@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from rss_parser.converter import get_dict, get_text
+from rss_parser.converter import get_json_text, get_text
 from rss_parser.schema import Channel
 
 
@@ -13,9 +13,9 @@ def test_get_dict():
         date: datetime
 
     test_dataclass = Test(test1="test", test2=1, date=datetime(2005, 7, 14))
-    dict_representation = get_dict(test_dataclass)
-    assert isinstance(dict_representation, dict)
-    assert dict_representation == {"test1": "test", "test2": 1, "date": "2005-07-14 00:00:00"}
+    dict_representation = get_json_text(test_dataclass)
+    assert isinstance(dict_representation, str)
+    assert dict_representation == '{\n    "test1": "test",\n    "test2": 1,\n    "date": "2005-07-14 00:00:00"\n}'
 
 
 def test_get_text():

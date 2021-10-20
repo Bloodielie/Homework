@@ -1,12 +1,11 @@
 import logging
 from argparse import ArgumentParser
-from pprint import pprint
 
 import requests
 from bs4 import BeautifulSoup
 from rss_parser import __version__
 from rss_parser.content_wrapper import Bs4ContentWrapper
-from rss_parser.converter import get_dict, get_text
+from rss_parser.converter import get_json_text, get_text
 from rss_parser.exceptions import ResolveError
 from rss_parser.parser import RSSParser
 from rss_parser.schema import Rss
@@ -75,11 +74,13 @@ def main():
         logger.debug("Limiting {} elements to {}.".format(len(result.channel.items), console_args.limit))
         result.channel.items = result.channel.items[: console_args.limit]
 
-    logger.debug("Output data to stdout.")
     if console_args.json:
-        pprint(get_dict(result.channel))
+        value_to_print = get_json_text(result.channel)
     else:
-        print(get_text(result.channel))
+        value_to_print = get_text(result.channel)
+
+    logger.debug("Output data to stdout.")
+    print(value_to_print)
 
 
 if __name__ == "__main__":
