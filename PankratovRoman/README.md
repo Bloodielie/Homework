@@ -1,7 +1,6 @@
 ## Python command-line RSS reader  
 #### EPAM Python Training final task 2021.09  
 
----
 ## INSTALLATION
 
 The program is written in Python 3.9.  
@@ -14,11 +13,11 @@ To install the required modules for development, enter:
 pip install -r dev-requirements.txt
 ```
 
----
 ## USAGE
 
+Interface:  
 ```bash
-usage: main.py [-h] [--version] [--json] [--verbose] [--limit LIMIT] source
+usage: main.py [-h] [--version] [--json] [--verbose] [--limit LIMIT] [--date [DATE]] [source]
 
 Python command-line RSS reader.
 
@@ -27,13 +26,28 @@ positional arguments:
 
 optional arguments:
   -h, --help     show this help message and exit
-  --version      show program's version number and exit
+  --version      Prints version info
   --json         Print result as JSON in stdout
   --verbose      Outputs verbose status messages
   --limit LIMIT  Limit news topics if this parameter provided
+  --date [DATE]  Outputs rss feed for the specified date
 ```
 
----
+If the `source` parameter is used, the utility receives data from the Internet, saves it to the cache and outputs it to the console.  
+A cache is located in a current working directory with file name `cache.txt`.  
+The cache has a structure(`date` has `%Y%m%d` format, `source` parameter passed to the utility, `news` - parsed data in json format):
+
+```json
+{
+  "date": {
+    "source": ["news", "news", "news"]
+  }
+}
+```
+
+if the `--date` argument is used without `source`, the utility displays all news for a specific date.  
+if the `--date` argument is used with `source`, the utility displays all news for a specific date corresponding to `source`.
+
 ## Example output  
 
 Text output:   

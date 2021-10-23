@@ -1,6 +1,7 @@
 """Module describing the interface of interaction with the main parts of the program."""
 
 from abc import ABC, abstractmethod
+from collections import UserDict
 from dataclasses import Field
 from typing import Generic, Type, TypeVar, Any, Optional, Iterator, Dict
 
@@ -134,3 +135,15 @@ class IContentWrapper(ABC):
     @abstractmethod
     def __str__(self) -> str:
         """Returns the content nested in the wrapper"""
+
+
+class BaseStorage(ABC, UserDict):
+    """Base class for data store"""
+
+    @abstractmethod
+    def save(self) -> None:
+        """Saves data to storage."""
+
+    @abstractmethod
+    def close(self) -> None:
+        """Closes the connection to storage."""

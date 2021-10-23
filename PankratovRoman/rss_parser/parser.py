@@ -42,6 +42,8 @@ class RSSParser(IParser):
 
             for tag_name in (*field.metadata.get("tag_names", []), attr):
                 resolver_result = resolver.resolve(content_wrapper, tag_name, field.type)
+                if isinstance(resolver_result, list) and len(resolver_result) == 0:
+                    continue
                 if resolver_result is not None:
                     break
 

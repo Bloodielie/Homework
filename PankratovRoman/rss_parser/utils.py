@@ -1,8 +1,9 @@
 """A module that includes various utilities."""
-
-from argparse import Action
+import argparse
 from typing import Union
 from urllib.parse import urlparse
+
+from rss_parser import __version__
 
 
 def is_optional_typing(annotation) -> bool:
@@ -50,3 +51,27 @@ def is_valid_url(url: str) -> bool:
         return all([result.scheme, result.netloc])
     except ValueError:
         return False
+
+
+def init_argparse() -> argparse.ArgumentParser:
+    """Initialize argparse arguments.
+
+    Returns:
+        Parsed arguments.
+    """
+    console_args_parser = argparse.ArgumentParser(description="Python command-line RSS reader.")
+    console_args_parser.add_argument(
+        "--version", action="version", version=f"Version {__version__}", help="Prints version info"
+    )
+    console_args_parser.add_argument(
+        "--json", default=False, action="store_true", help="Print result as JSON in stdout"
+    )
+    console_args_parser.add_argument(
+        "--verbose", default=False, action="store_true", help="Outputs verbose status messages"
+    )
+    console_args_parser.add_argument(
+        "--limit", metavar="LIMIT", type=int, help="Limit news topics if this parameter provided"
+    )
+    console_args_parser.add_argument("--date", nargs="?", type=str, help="Outputs rss feed for the specified date")
+    console_args_parser.add_argument("source", nargs="?", type=str, help="RSS URL")
+    return console_args_parser
