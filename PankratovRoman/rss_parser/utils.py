@@ -75,5 +75,8 @@ def init_argparse() -> argparse.ArgumentParser:
     console_args_parser.add_argument("--date", nargs="?", type=str, help="Outputs rss feed for the specified date")
     console_args_parser.add_argument("--to-html", type=str, help="Saves news in html format along the specified path.")
     console_args_parser.add_argument("--to-pdf", type=str, help="Saves news in pdf format along the specified path.")
+    console_args_parser.add_argument(
+        "--colorize", default=False, action="store_true", help="Print colored messages to the console"
+    )
     console_args_parser.add_argument("source", nargs="?", type=str, help="RSS URL")
     return console_args_parser

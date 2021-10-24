@@ -17,7 +17,7 @@ pip install -r dev-requirements.txt
 
 Interface:  
 ```
-usage: main.py [-h] [--version] [--json] [--verbose] [--limit LIMIT] [--date [DATE]] [--to-html TO_HTML] [--to-pdf TO_PDF] [source]
+usage: main.py [-h] [--version] [--json] [--verbose] [--limit LIMIT] [--date [DATE]] [--to-html TO_HTML] [--to-pdf TO_PDF] [--colorize] [source]
 
 Python command-line RSS reader.
 
@@ -32,7 +32,8 @@ optional arguments:
   --limit LIMIT      Limit news topics if this parameter provided
   --date [DATE]      Outputs rss feed for the specified date
   --to-html TO_HTML  Saves news in html format along the specified path.
-  --to-pdf TO_PDF    Saves news in pdf format along the specified path
+  --to-pdf TO_PDF    Saves news in pdf format along the specified path.
+  --colorize         Print colored messages to the console
 ```
 
 If the `source` parameter is used, the utility receives data from the Internet, saves it to the cache and outputs it to the console.  
