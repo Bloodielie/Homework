@@ -2,8 +2,12 @@
 
 import json
 import logging
+import os
 from dataclasses import asdict
-from typing import Dict, Any
+from pathlib import Path
+from typing import Dict, Any, Sequence
+
+from jinja2 import Template
 
 from rss_parser.schema import Channel
 from rss_parser.types import DataClassType
@@ -59,3 +63,15 @@ def get_text(channel: Channel) -> str:
         )
         for i, item in enumerate(channel.items)
     )
+
+
+def get_html_text(channels: Sequence[Channel]) -> str:
+    """Converts channels to html string."""
+
+    logger.debug("Convert channels to string html representation.")
+    path_to_template = os.path.join(Path(__file__).resolve().parent.parent, "static", "template.html")
+    with open(path_to_template, encoding="utf-8") as f:
+        html = f.read()
+
+    template = Template(html)
+    return template.render(channels=channels)

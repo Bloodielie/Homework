@@ -73,5 +73,8 @@ def init_argparse() -> argparse.ArgumentParser:
         "--limit", metavar="LIMIT", type=int, help="Limit news topics if this parameter provided"
     )
     console_args_parser.add_argument("--date", nargs="?", type=str, help="Outputs rss feed for the specified date")
+    console_args_parser.add_argument(
+        "--to-html", type=str, help="Saves news in html format along the specified path."
+    )
     console_args_parser.add_argument("source", nargs="?", type=str, help="RSS URL")
     return console_args_parser

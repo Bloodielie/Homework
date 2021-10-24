@@ -16,7 +16,7 @@ pip install -r dev-requirements.txt
 ## USAGE
 
 Interface:  
-```bash
+```
 usage: main.py [-h] [--version] [--json] [--verbose] [--limit LIMIT] [--date [DATE]] [source]
 
 Python command-line RSS reader.
@@ -79,7 +79,7 @@ Items:
 ---
 Json output:  
 
-```
+```json
 {
    "title":"Yahoo News - Latest News & Headlines",
    "link":"https://www.yahoo.com/news",

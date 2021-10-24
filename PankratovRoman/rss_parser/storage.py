@@ -1,3 +1,5 @@
+"""Contains classes for working with various data stores."""
+
 import json
 
 from rss_parser.base import BaseStorage

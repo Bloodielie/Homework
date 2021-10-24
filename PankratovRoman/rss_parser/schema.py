@@ -49,7 +49,7 @@ class Item:
     guid: Optional[Guid]
     pub_date: Optional[datetime] = field(metadata={"tag_names": ["pubDate"]})
     source: Optional[Source]
-    content: Optional[Content] = field(metadata={"tag_names": ["media:content", "media:thumbnail"]})
+    content: Optional[Content] = field(metadata={"tag_names": ["media:content"]})
 
 
 @dataclass
