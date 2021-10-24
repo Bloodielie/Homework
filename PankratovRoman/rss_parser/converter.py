@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, Any, Sequence
 
 from jinja2 import Template
+from xhtml2pdf import pisa
 
 from rss_parser.schema import Channel
 from rss_parser.types import DataClassType
@@ -69,9 +70,16 @@ def get_html_text(channels: Sequence[Channel]) -> str:
     """Converts channels to html string."""
 
     logger.debug("Convert channels to string html representation.")
-    path_to_template = os.path.join(Path(__file__).resolve().parent.parent, "static", "template.html")
-    with open(path_to_template, encoding="utf-8") as f:
+    static_path = os.path.join(Path(__file__).resolve().parent.parent, "static")
+    with open(os.path.join(static_path, "template.html"), encoding="utf-8") as f:
         html = f.read()
 
     template = Template(html)
-    return template.render(channels=channels)
+    return template.render(channels=channels, path_to_fonts=os.path.join(static_path, "fonts"))
+
+
+def save_pdf_to_file(file_path: str, html_str: str) -> None:
+    """Converts html to pdf and saves it in the file."""
+
+    with open(file_path, "wb") as f:
+        pisa.CreatePDF(html_str, dest=f, encoding="UTF-8")

@@ -6,7 +6,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from rss_parser.content_wrapper import Bs4ContentWrapper, DictContentWrapper
-from rss_parser.converter import get_json_text, get_text, get_html_text
+from rss_parser.converter import get_json_text, get_text, get_html_text, save_pdf_to_file
 from rss_parser.exceptions import ResolveError
 from rss_parser.parser import RSSParser
 from rss_parser.schema import Rss
@@ -51,7 +51,7 @@ def main():
             return None
 
         logger.debug("Get data from {} url.".format(console_args.source))
-        response = requests.get(console_args.source)
+        response = requests.get(console_args.source, verify=False)
         if not response.ok:
             print("Failed to get RSS data.")
             return None
@@ -88,17 +88,25 @@ def main():
 
         value_to_print = get_json_text(result.channel) if console_args.json else get_text(result.channel)
 
-        logger.debug("Output {} data to stdout.".format(i+1))
+        logger.debug("Output {} data to stdout.".format(i + 1))
         print(value_to_print)
 
+    html_str = get_html_text([result.channel for result in parsing_results])
+
     if console_args.to_html is not None:
-        logger.debug("Save html to the file.")
+        logger.debug("Save html content to the file.")
         try:
             with open(console_args.to_html, "w", encoding="utf-8") as f:
-                html = get_html_text([result.channel for result in parsing_results])
-                f.write(html)
+                f.write(html_str)
         except FileNotFoundError:
-            print("Wrong path to save html file")
+            print("Wrong path to save html in the file")
+
+    if console_args.to_pdf is not None:
+        logger.debug("Save pdf content to the file.")
+        try:
+            save_pdf_to_file(console_args.to_pdf, html_str)
+        except FileNotFoundError:
+            print("Wrong path to save pdf in the file")
 
     storage.save()
     storage.close()
