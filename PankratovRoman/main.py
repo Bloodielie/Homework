@@ -18,6 +18,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 logging.getLogger("urllib3").setLevel(level=logging.WARNING)
+logging.getLogger("xhtml2pdf").setLevel(level=logging.WARNING)
 
 
 def main():
