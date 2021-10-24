@@ -1,11 +1,14 @@
 import logging
 import os
+import warnings
 from dataclasses import asdict
 from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
 from colorama import Fore, init
+from urllib3.exceptions import InsecureRequestWarning
+
 from rss_parser.content_wrapper import Bs4ContentWrapper, DictContentWrapper
 from rss_parser.converter import get_json_text, get_text, get_html_text, save_pdf_to_file
 from rss_parser.exceptions import ResolveError
@@ -20,6 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 logging.getLogger("urllib3").setLevel(level=logging.WARNING)
 logging.getLogger("xhtml2pdf").setLevel(level=logging.WARNING)
+warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 
 def main():
