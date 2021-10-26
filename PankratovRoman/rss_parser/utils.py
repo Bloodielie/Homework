@@ -1,12 +1,14 @@
 """A module that includes various utilities."""
 import argparse
 import logging
-from typing import Union
+from typing import Union, Type, TypeVar
 from urllib.parse import urlparse
 
 from colorama import Fore
 
 from rss_parser import __version__
+
+T = TypeVar("T")
 
 
 def is_optional_typing(annotation) -> bool:
@@ -109,3 +111,16 @@ def get_console_handler(is_verbose: bool, is_colorize: bool) -> logging.StreamHa
     console_handler.setLevel(level)
     console_handler.setFormatter(logging.Formatter(output_format))
     return console_handler
+
+
+def convert_namespace_to_dataclass(namespace: argparse.Namespace, dataclass: Type[T]) -> T:
+    """Initialize dataclass by namespace fields.
+
+    Args:
+        namespace: Namespace for converting.
+        dataclass: Dataclass for storing data.
+
+    Returns:
+        Initialized dataclass with namespace fields.
+    """
+    return dataclass(**vars(namespace))

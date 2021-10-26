@@ -1,7 +1,6 @@
 import logging
 import os
 import warnings
-from argparse import Namespace
 from dataclasses import asdict
 from datetime import datetime
 from typing import Sequence
@@ -16,9 +15,9 @@ from rss_parser.content_wrapper import Bs4ContentWrapper, DictContentWrapper
 from rss_parser.converter import get_json_text, get_text, get_html_text, save_pdf_to_file
 from rss_parser.exceptions import ResolveError
 from rss_parser.parser import RSSParser
-from rss_parser.schema import Channel
+from rss_parser.schema import Channel, ConsoleArgs
 from rss_parser.storage import FileStorage
-from rss_parser.utils import is_valid_url, init_argparse, get_console_handler
+from rss_parser.utils import is_valid_url, init_argparse, get_console_handler, convert_namespace_to_dataclass
 
 logging.basicConfig(
     filename="log.log", filemode="w", format="%(name)s - %(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
@@ -30,7 +29,7 @@ warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 
 def process_rss(
-    console_args: Namespace, parser: IParser, storage: BaseStorage, content_wrappers: Sequence[IContentWrapper]
+    console_args: ConsoleArgs, parser: IParser, storage: BaseStorage, content_wrappers: Sequence[IContentWrapper]
 ) -> None:
     channels = []
     for i, content_wrapper in enumerate(content_wrappers):
@@ -78,7 +77,8 @@ def process_rss(
 def main():
     init()
 
-    console_args = init_argparse().parse_args()
+    namespace = init_argparse().parse_args()
+    console_args = convert_namespace_to_dataclass(namespace, ConsoleArgs)
 
     parser = RSSParser()
     storage = FileStorage(os.path.join(os.getcwd(), "cache.txt"))

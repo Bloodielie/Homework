@@ -105,3 +105,15 @@ class Channel:
 class Rss:
     version: str
     channel: Channel
+
+
+@dataclass(frozen=True)
+class ConsoleArgs:
+    source: Optional[str]
+    date: Optional[str]
+    limit: Optional[int]
+    json: bool
+    verbose: bool
+    colorize: bool
+    to_html: Optional[str]
+    to_pdf: Optional[str]

@@ -1,8 +1,10 @@
 import argparse
 import logging
+from dataclasses import dataclass
 from typing import Optional, List, Union, Tuple
 
-from rss_parser.utils import is_optional_typing, is_list_typing, is_valid_url, init_argparse, get_console_handler
+from rss_parser.utils import is_optional_typing, is_list_typing, is_valid_url, init_argparse, get_console_handler, \
+    convert_namespace_to_dataclass
 
 
 def test_optional_typing():
@@ -71,3 +73,20 @@ def test_get_console_handler():
 
     console_handler = get_console_handler(True, False)
     assert console_handler.level is logging.DEBUG
+
+
+def test_convert_namespace_to_dataclass():
+    @dataclass
+    class Test:
+        a: str
+        b: int
+
+    init_dataclass = convert_namespace_to_dataclass(argparse.Namespace(a="1", b=1), Test)
+
+    assert isinstance(init_dataclass, Test)
+
+    assert isinstance(init_dataclass.a, str)
+    assert init_dataclass.a == "1"
+
+    assert isinstance(init_dataclass.b, int)
+    assert init_dataclass.b == 1
