@@ -13,7 +13,7 @@ from rss_parser.content_wrapper import Bs4ContentWrapper, DictContentWrapper
 from rss_parser.converter import get_json_text, get_text, get_html_text, save_pdf_to_file
 from rss_parser.exceptions import ResolveError
 from rss_parser.parser import RSSParser
-from rss_parser.schema import Rss
+from rss_parser.schema import Channel
 from rss_parser.storage import FileStorage
 from rss_parser.utils import is_valid_url, init_argparse
 
@@ -76,19 +76,19 @@ def main():
         content = response.text
         data = content[content.find("?>") + 2 :] if content[:5] == "<?xml" else content
         bs4_soup = BeautifulSoup(data, "xml")
-        rss_tag = bs4_soup.find("rss")
-        if rss_tag is None:
+        channel_tag = bs4_soup.find("channel")
+        if channel_tag is None:
             logger.info("Could not find data.")
             return None
 
-        content_wrappers = [Bs4ContentWrapper(rss_tag)]
+        content_wrappers = [Bs4ContentWrapper(channel_tag)]
 
-    parsing_results = []
+    channels = []
     for i, content_wrapper in enumerate(content_wrappers):
         logger.debug("Parse the received data.")
         try:
-            result = parser.parse_by_dataclass(content_wrapper, Rss)
-            parsing_results.append(result)
+            channel = parser.parse_by_dataclass(content_wrapper, Channel)
+            channels.append(channel)
         except ResolveError as e:
             logger.info(e)
             continue
@@ -97,18 +97,18 @@ def main():
             logger.debug("Save data to storage.")
             urls_in_storage = storage.setdefault(datetime.now().strftime("%Y%m%d"), {})
             news_in_storage = urls_in_storage.setdefault(console_args.source, [])
-            news_in_storage.append(asdict(result))
+            news_in_storage.append(asdict(channel))
 
         if console_args.limit is not None:
-            logger.debug("Limiting {} elements to {}.".format(len(result.channel.items), console_args.limit))
-            result.channel.items = result.channel.items[: console_args.limit]
+            logger.debug("Limiting {} elements to {}.".format(len(channel.items), console_args.limit))
+            channel.items = channel.items[: console_args.limit]
 
-        value_to_print = get_json_text(result.channel) if console_args.json else get_text(result.channel)
+        value_to_print = get_json_text(channel) if console_args.json else get_text(channel)
 
         logger.debug("Output {} data to stdout.".format(i + 1))
         logger.info(value_to_print)
 
-    html_str = get_html_text([result.channel for result in parsing_results])
+    html_str = get_html_text(channels)
 
     if console_args.to_html is not None:
         logger.debug("Save html content to the file.")
