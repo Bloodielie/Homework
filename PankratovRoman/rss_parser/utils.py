@@ -1,7 +1,10 @@
 """A module that includes various utilities."""
 import argparse
+import logging
 from typing import Union
 from urllib.parse import urlparse
+
+from colorama import Fore
 
 from rss_parser import __version__
 
@@ -80,3 +83,29 @@ def init_argparse() -> argparse.ArgumentParser:
     )
     console_args_parser.add_argument("source", nargs="?", type=str, help="RSS URL")
     return console_args_parser
+
+
+def get_console_handler(is_verbose: bool, is_colorize: bool) -> logging.StreamHandler:
+    """Initialize stream handler.
+
+    Args:
+        is_verbose: Displays additional information.
+        is_colorize: Colorizes messages.
+
+    Returns:
+        Configured stream handler.
+    """
+    if is_verbose:
+        level = logging.DEBUG
+        if is_colorize:
+            output_format = f"{Fore.RED}%(name)s - {Fore.BLUE}%(asctime)s - {Fore.GREEN}%(message)s{Fore.RESET}"
+        else:
+            output_format = "%(name)s - %(asctime)s - %(message)s"
+    else:
+        level = logging.INFO
+        output_format = f"{Fore.GREEN}%(message)s{Fore.RESET}" if is_colorize else "%(message)s"
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(level)
+    console_handler.setFormatter(logging.Formatter(output_format))
+    return console_handler

@@ -1,7 +1,8 @@
 import argparse
+import logging
 from typing import Optional, List, Union, Tuple
 
-from rss_parser.utils import is_optional_typing, is_list_typing, is_valid_url, init_argparse
+from rss_parser.utils import is_optional_typing, is_list_typing, is_valid_url, init_argparse, get_console_handler
 
 
 def test_optional_typing():
@@ -62,3 +63,11 @@ def test_init_argparse():
     assert args.json is not None
     assert isinstance(args.json, bool)
     assert args.json
+
+
+def test_get_console_handler():
+    console_handler = get_console_handler(False, False)
+    assert console_handler.level is logging.INFO
+
+    console_handler = get_console_handler(True, False)
+    assert console_handler.level is logging.DEBUG

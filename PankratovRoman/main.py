@@ -1,21 +1,24 @@
 import logging
 import os
 import warnings
+from argparse import Namespace
 from dataclasses import asdict
 from datetime import datetime
+from typing import Sequence
 
 import requests
 from bs4 import BeautifulSoup
-from colorama import Fore, init
+from colorama import init
 from urllib3.exceptions import InsecureRequestWarning
 
+from rss_parser.base import IParser, BaseStorage, IContentWrapper
 from rss_parser.content_wrapper import Bs4ContentWrapper, DictContentWrapper
 from rss_parser.converter import get_json_text, get_text, get_html_text, save_pdf_to_file
 from rss_parser.exceptions import ResolveError
 from rss_parser.parser import RSSParser
 from rss_parser.schema import Channel
 from rss_parser.storage import FileStorage
-from rss_parser.utils import is_valid_url, init_argparse
+from rss_parser.utils import is_valid_url, init_argparse, get_console_handler
 
 logging.basicConfig(
     filename="log.log", filemode="w", format="%(name)s - %(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
@@ -26,63 +29,9 @@ logging.getLogger("xhtml2pdf").setLevel(level=logging.WARNING)
 warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 
-def main():
-    init()
-
-    console_args = init_argparse().parse_args()
-
-    parser = RSSParser()
-    storage = FileStorage(os.path.join(os.getcwd(), "cache.txt"))
-
-    if console_args.verbose:
-        level = logging.DEBUG
-        if console_args.colorize:
-            output_format = f"{Fore.RED}%(name)s - {Fore.BLUE}%(asctime)s - {Fore.GREEN}%(message)s{Fore.RESET}"
-        else:
-            output_format = "%(name)s - %(asctime)s - %(message)s"
-    else:
-        level = logging.INFO
-        output_format = f"{Fore.GREEN}%(message)s{Fore.RESET}" if console_args.colorize else "%(message)s"
-
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(level)
-    console_handler.setFormatter(logging.Formatter(output_format))
-    logging.root.addHandler(console_handler)
-
-    if console_args.date is not None:
-        logger.debug("Get data from storage for {} date.".format(console_args.date))
-        content = storage.get(console_args.date, {})
-        if console_args.source is not None:
-            data = content.get(console_args.source)
-        else:
-            data = [item for key in content.keys() for item in content.get(key)]
-
-        if data is None:
-            logger.info("Could not find data.")
-            return None
-
-        content_wrappers = [DictContentWrapper(content) for content in data]
-    else:
-        if not is_valid_url(console_args.source):
-            logger.info("Could not find data.")
-            return None
-
-        logger.debug("Get data from {} url.".format(console_args.source))
-        response = requests.get(console_args.source, verify=False)
-        if not response.ok:
-            logger.info("Could not find data.")
-            return None
-
-        content = response.text
-        data = content[content.find("?>") + 2 :] if content[:5] == "<?xml" else content
-        bs4_soup = BeautifulSoup(data, "xml")
-        channel_tag = bs4_soup.find("channel")
-        if channel_tag is None:
-            logger.info("Could not find data.")
-            return None
-
-        content_wrappers = [Bs4ContentWrapper(channel_tag)]
-
+def process_rss(
+    console_args: Namespace, parser: IParser, storage: BaseStorage, content_wrappers: Sequence[IContentWrapper]
+) -> None:
     channels = []
     for i, content_wrapper in enumerate(content_wrappers):
         logger.debug("Parse the received data.")
@@ -125,8 +74,59 @@ def main():
         except FileNotFoundError:
             logger.info("Wrong path to save pdf in the file")
 
-    storage.save()
-    storage.close()
+
+def main():
+    init()
+
+    console_args = init_argparse().parse_args()
+
+    parser = RSSParser()
+    storage = FileStorage(os.path.join(os.getcwd(), "cache.txt"))
+
+    console_handler = get_console_handler(console_args.verbose, console_args.colorize)
+    logging.root.addHandler(console_handler)
+
+    if console_args.date is not None:
+        logger.debug("Get data from storage for {} date.".format(console_args.date))
+        content = storage.get(console_args.date, {})
+        if console_args.source is not None:
+            data = content.get(console_args.source)
+        else:
+            data = [item for key in content.keys() for item in content.get(key)]
+
+        if data is None:
+            logger.info("Could not find data.")
+            return None
+
+        content_wrappers = [DictContentWrapper(content) for content in data]
+    else:
+        if not is_valid_url(console_args.source):
+            logger.info("Could not find data.")
+            return None
+
+        logger.debug("Get data from {} url.".format(console_args.source))
+        response = requests.get(console_args.source, verify=False)
+        if not response.ok:
+            logger.info("Could not find data.")
+            return None
+
+        content = response.text
+        data = content[content.find("?>") + 2 :] if content[:5] == "<?xml" else content
+        bs4_soup = BeautifulSoup(data, "xml")
+        channel_tag = bs4_soup.find("channel")
+        if channel_tag is None:
+            logger.info("Could not find data.")
+            return None
+
+        content_wrappers = [Bs4ContentWrapper(channel_tag)]
+
+    try:
+        process_rss(console_args, parser, storage, content_wrappers)
+    except Exception as e:
+        logger.info("The program stopped with an unhandled error: {}".format(e))
+    finally:
+        storage.save()
+        storage.close()
 
 
 if __name__ == "__main__":
