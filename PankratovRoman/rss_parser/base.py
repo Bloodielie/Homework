@@ -3,7 +3,9 @@
 from abc import ABC, abstractmethod
 from collections import UserDict
 from dataclasses import Field
-from typing import Generic, Type, TypeVar, Any, Optional, Iterator, Dict
+from typing import Generic, Type, TypeVar, Any, Optional, Iterator, Dict, Sequence
+
+from rss_parser.schema import ConsoleArgs
 
 T = TypeVar("T", bound=Any)
 
@@ -147,3 +149,18 @@ class BaseStorage(ABC, UserDict):
     @abstractmethod
     def close(self) -> None:
         """Closes the connection to storage."""
+
+
+class IContentGetter(ABC):
+    """The interface for the class that receives the content."""
+
+    @abstractmethod
+    def get_content_wrappers(self, console_args: ConsoleArgs) -> Optional[Sequence[IContentWrapper]]:
+        """Receives content and wraps it in IContentWrapper.
+
+        Args:
+            console_args: Console arguments for getting data.
+
+        Return:
+            Returns initialized ContentWrappers or None
+        """

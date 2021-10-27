@@ -5,13 +5,11 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import Sequence
 
-import requests
-from bs4 import BeautifulSoup
 from colorama import init
 from urllib3.exceptions import InsecureRequestWarning
 
 from rss_parser.base import IParser, BaseStorage, IContentWrapper
-from rss_parser.content_wrapper import Bs4ContentWrapper, DictContentWrapper
+from rss_parser.content_getter import StorageContentGetter, InternetContentGetter
 from rss_parser.converter import get_json_text, get_text, get_html_text, save_pdf_to_file
 from rss_parser.exceptions import ResolveError
 from rss_parser.parser import RSSParser
@@ -87,38 +85,18 @@ def main():
     logging.root.addHandler(console_handler)
 
     if console_args.date is not None:
-        logger.debug("Get data from storage for {} date.".format(console_args.date))
-        content = storage.get(console_args.date, {})
-        if console_args.source is not None:
-            data = content.get(console_args.source)
-        else:
-            data = [item for key in content.keys() for item in content.get(key)]
-
-        if data is None:
-            logger.info("Could not find data.")
-            return None
-
-        content_wrappers = [DictContentWrapper(content) for content in data]
+        content_getter = StorageContentGetter(storage)
+    elif not is_valid_url(console_args.source):
+        logger.info("You have passed the wrong url.")
+        return None
     else:
-        if not is_valid_url(console_args.source):
-            logger.info("Could not find data.")
-            return None
+        content_getter = InternetContentGetter()
 
-        logger.debug("Get data from {} url.".format(console_args.source))
-        response = requests.get(console_args.source, verify=False)
-        if not response.ok:
-            logger.info("Could not find data.")
-            return None
-
-        content = response.text
-        data = content[content.find("?>") + 2 :] if content[:5] == "<?xml" else content
-        bs4_soup = BeautifulSoup(data, "xml")
-        channel_tag = bs4_soup.find("channel")
-        if channel_tag is None:
-            logger.info("Could not find data.")
-            return None
-
-        content_wrappers = [Bs4ContentWrapper(channel_tag)]
+    logger.debug("Receive content.")
+    content_wrappers = content_getter.get_content_wrappers(console_args)
+    if content_wrappers is None:
+        logger.debug("Failed to get content.")
+        return None
 
     try:
         process_rss(console_args, parser, storage, content_wrappers)
