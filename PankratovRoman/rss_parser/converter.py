@@ -5,7 +5,7 @@ import logging
 import os
 from dataclasses import asdict
 from pathlib import Path
-from typing import Dict, Any, Sequence
+from typing import Sequence
 
 from jinja2 import Template
 from xhtml2pdf import pisa

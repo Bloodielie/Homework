@@ -53,7 +53,7 @@ class InternetContentGetter(IContentGetter):
             return None
 
         content = response.text
-        data = content[content.find("?>") + 2:] if content[:5] == "<?xml" else content
+        data = content[content.find("?>") + 2 :] if content[:5] == "<?xml" else content
         bs4_soup = BeautifulSoup(data, "xml")
         channel_tag = bs4_soup.find("channel")
         if channel_tag is None:

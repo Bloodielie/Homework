@@ -1,3 +1,11 @@
+"""This module combines all the other modules and provides entry to RSS processing from the command line.
+
+Example:
+    python main.py https://news.yahoo.com/rss/ --limit 5 --json --colorize
+    python main.py https://vse.sale/news/rss --limit 5 --to-html test.html
+    python main.py https://lenta.ru/rss/top7 --limit 5 --verbose
+"""
+
 import logging
 import os
 import warnings
@@ -6,8 +14,6 @@ from datetime import datetime
 from typing import Sequence
 
 from colorama import init
-from urllib3.exceptions import InsecureRequestWarning
-
 from rss_parser.base import IParser, BaseStorage, IContentWrapper
 from rss_parser.content_getter import StorageContentGetter, InternetContentGetter
 from rss_parser.converter import get_json_text, get_text, get_html_text, save_pdf_to_file
@@ -16,6 +22,7 @@ from rss_parser.parser import RSSParser
 from rss_parser.schema import Channel, ConsoleArgs
 from rss_parser.storage import FileStorage
 from rss_parser.utils import is_valid_url, init_argparse, get_console_handler, convert_namespace_to_dataclass
+from urllib3.exceptions import InsecureRequestWarning
 
 logging.basicConfig(
     filename="log.log", filemode="w", format="%(name)s - %(asctime)s - %(levelname)s - %(message)s", level=logging.DEBUG
@@ -28,7 +35,15 @@ warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 def process_rss(
     console_args: ConsoleArgs, parser: IParser, storage: BaseStorage, content_wrappers: Sequence[IContentWrapper]
-) -> None:
+):
+    """Performs main RSS processing.
+
+    Args:
+        console_args: Arguments parsed from the console.
+        parser: Class for parsing content.
+        storage: Local data storage.
+        content_wrappers: Content wrapper for consistent work.
+    """
     channels = []
     for i, content_wrapper in enumerate(content_wrappers):
         logger.debug("Parse the received data.")
@@ -55,7 +70,6 @@ def process_rss(
         logger.info(value_to_print)
 
     html_str = get_html_text(channels)
-
     if console_args.to_html is not None:
         logger.debug("Save html content to the file.")
         try:
@@ -73,6 +87,7 @@ def process_rss(
 
 
 def main():
+    """The entry point to the program doing some preparation and starting rss processing."""
     init()
 
     namespace = init_argparse().parse_args()
